@@ -1,0 +1,142 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Butterfly WebAR</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+
+<body>
+
+  <div id="loading">Loading Butterfly AR...</div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
+    color-space="sRGB"
+    renderer="colorManagement: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    loading-screen="enabled: false">
+
+    <a-assets timeout="30000">
+
+      <a-asset-item
+        id="butterflyModel"
+        src="./assets/butterfly.glb">
+      </a-asset-item>
+
+      <video
+        id="infoVideo"
+        src="./assets/butterfly-video.mp4"
+        preload="auto"
+        muted
+        loop
+        playsinline
+        webkit-playsinline>
+      </video>
+
+    </a-assets>
+
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+    <a-entity
+      id="butterflyTarget"
+      mindar-image-target="targetIndex: 0">
+
+      <!-- 3D Butterfly -->
+      <a-entity
+        id="butterfly3D"
+        gltf-model="#butterflyModel"
+        position="0 0.30 0.12"
+        scale="0.18 0.18 0.18"
+        rotation="0 0 0">
+      </a-entity>
+
+      <!-- Information Panel -->
+      <a-plane
+        position="-0.34 -0.38 0.05"
+        width="0.66"
+        height="0.68"
+        color="#fff8fc"
+        material="shader: flat; transparent: true; opacity: 0.98">
+      </a-plane>
+
+      <!-- Information Title -->
+      <a-text
+        value="MONARCH BUTTERFLY"
+        position="-0.63 -0.15 0.07"
+        width="0.58"
+        color="#7B3F98"
+        wrap-count="23"
+        align="left"
+        font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
+      </a-text>
+
+      <!-- Information Text -->
+      <a-text
+        value="Scientific name: Danaus plexippus&#10;&#10;Wings: Orange and black&#10;&#10;Diet: Flower nectar&#10;&#10;Special fact: Known for long-distance migration."
+        position="-0.63 -0.25 0.07"
+        width="0.57"
+        color="#252525"
+        wrap-count="25"
+        align="left">
+      </a-text>
+
+      <!-- Video -->
+      <a-video
+        id="butterflyVideo"
+        src="#infoVideo"
+        position="0.36 -0.38 0.06"
+        width="0.68"
+        height="0.43">
+      </a-video>
+
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    const scene = document.querySelector("a-scene");
+    const loading = document.querySelector("#loading");
+    const target = document.querySelector("#butterflyTarget");
+    const video = document.querySelector("#infoVideo");
+
+    scene.addEventListener("renderstart", () => {
+      loading.style.display = "none";
+    });
+
+    scene.addEventListener("arReady", () => {
+      loading.style.display = "none";
+    });
+
+    scene.addEventListener("arError", () => {
+      loading.textContent =
+        "AR error. Check camera permissions and target file.";
+      loading.style.display = "flex";
+    });
+
+    target.addEventListener("targetFound", () => {
+      video.play().catch((error) => {
+        console.log("Video playback could not start:", error);
+      });
+    });
+
+    target.addEventListener("targetLost", () => {
+      video.pause();
+    });
+  </script>
+
+</body>
+</html>
+```
+
