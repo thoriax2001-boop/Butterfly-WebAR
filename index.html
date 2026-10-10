@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,27 +11,62 @@
 
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    a-scene {
+      position: fixed !important;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent !important;
+    }
+
+    a-scene canvas {
+      background: transparent !important;
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff8fc;
+      color: #7B3F98;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+    }
+  </style>
 </head>
 
 <body>
-
-  <div id="loading">Loading Butterfly AR...</div>
+  <div id="loading">Starting Butterfly AR...</div>
 
   <a-scene
     mindar-image="imageTargetSrc: ./targets.mind; autoStart: true;"
     color-space="sRGB"
-    renderer="colorManagement: true"
+    renderer="colorManagement: true; alpha: true; antialias: true"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     loading-screen="enabled: false">
 
     <a-assets timeout="30000">
-
       <a-asset-item
         id="butterflyModel"
         src="./assets/butterfly.glb">
       </a-asset-item>
-<video
+
+      <video
         id="infoVideo"
         src="./assets/butterfly-video.mp4"
         preload="auto"
@@ -40,7 +75,6 @@
         playsinline
         webkit-playsinline>
       </video>
-
     </a-assets>
 
     <a-camera
@@ -56,38 +90,38 @@
       <a-entity
         id="butterfly3D"
         gltf-model="#butterflyModel"
-        position="0 0.30 0.12"
-        scale="0.18 0.18 0.18"
+        position="0 0.25 0.12"
+        scale="0.08 0.08 0.08"
         rotation="0 0 0">
       </a-entity>
 
       <!-- Information Panel -->
       <a-plane
-        position="-0.34 -0.38 0.05"
-        width="0.66"
-        height="0.68"
+        position="0 -0.40 0.05"
+        width="1.50"
+        height="0.82"
         color="#fff8fc"
-        material="shader: flat; transparent: true; opacity: 0.98">
+        material="shader: flat; transparent: true; opacity: 0.96">
       </a-plane>
 
-      <!-- Information Title -->
+      <!-- Title -->
       <a-text
         value="MONARCH BUTTERFLY"
-        position="-0.63 -0.15 0.07"
-        width="0.58"
+        position="-0.68 -0.16 0.07"
+        width="0.62"
         color="#7B3F98"
-        wrap-count="23"
+        wrap-count="20"
         align="left"
         font="https://cdn.aframe.io/fonts/Roboto-msdf.json">
       </a-text>
 
-      <!-- Information Text -->
+      <!-- Information -->
       <a-text
-        value="Scientific name: Danaus plexippus&#10;&#10;Wings: Orange and black&#10;&#10;Diet: Flower nectar&#10;&#10;Special fact: Known for long-distance migration."
-        position="-0.63 -0.25 0.07"
-        width="0.57"
+        value="Scientific name:&#10;Danaus plexippus&#10;&#10;Wings: Orange and black&#10;&#10;Diet: Flower nectar&#10;&#10;Special fact: Long-distance migration."
+        position="-0.68 -0.29 0.07"
+        width="0.62"
         color="#252525"
-        wrap-count="25"
+        wrap-count="23"
         align="left">
       </a-text>
 
@@ -95,13 +129,20 @@
       <a-video
         id="butterflyVideo"
         src="#infoVideo"
-        position="0.36 -0.38 0.06"
-        width="0.68"
-        height="0.43">
+        position="0.39 -0.40 0.07"
+        width="0.70"
+        height="0.48">
       </a-video>
 
-    </a-entity>
+      <a-text
+        value="VIDEO"
+        position="0.18 -0.68 0.08"
+        width="0.42"
+        align="center"
+        color="#7B3F98">
+      </a-text>
 
+    </a-entity>
   </a-scene>
 
   <script>
@@ -110,8 +151,10 @@
     const target = document.querySelector("#butterflyTarget");
     const video = document.querySelector("#infoVideo");
 
+    let targetVisible = false;
+
     scene.addEventListener("renderstart", () => {
-      loading.style.display = "none";
+      // Keep the loading message until MindAR reports readiness.
     });
 
     scene.addEventListener("arReady", () => {
@@ -120,24 +163,32 @@
 
     scene.addEventListener("arError", () => {
       loading.textContent =
-        "AR error. Check camera permissions and target file.";
+        "Camera could not start. Allow camera access and reload.";
       loading.style.display = "flex";
     });
 
     target.addEventListener("targetFound", () => {
+      targetVisible = true;
+
       video.play().catch((error) => {
-        console.log("Video playback could not start:", error);
+        console.log("Video needs user interaction:", error);
       });
     });
 
     target.addEventListener("targetLost", () => {
+      targetVisible = false;
       video.pause();
     });
-  </script>
 
+    document.addEventListener("pointerdown", () => {
+      if (targetVisible && video.paused) {
+        video.play().catch((error) => {
+          console.log("Video playback error:", error);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
-```
-
 
 
